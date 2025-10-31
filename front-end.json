@@ -1,0 +1,455 @@
+[
+  {
+    "id": "LIMIT_VISUALS_PER_PAGE_STRICT",
+    "name": "Beperk aantal visuals per pagina (8–10)",
+    "description": "Rapporteert een waarschuwing als het aantal zichtbare visuals op een pagina groter is dan de strikte bovengrens (standaard 10). Sluit vormen, slicers, buttons en textboxes uit — in lijn met de bestaande regel maar strenger.",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "<=": [
+          {
+            "count": [
+              {
+                "filter": [
+                  { "var": "visuals" },
+                  {
+                    "and": [
+                      { "!=": [ { "var": "singleVisual.display.mode" }, "hidden" ] },
+                      {
+                        "!": [
+                          {
+                            "in": [
+                              { "var": "singleVisual.visualType" },
+                              ["shape","slicer","actionButton","textbox"]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "var": "paramMaxVisualsPerPageStrict" }
+        ]
+      },
+      { "visuals": ".", "paramMaxVisualsPerPageStrict": 10 },
+      true
+    ]
+  },
+
+  {
+    "id": "ENSURE_VISUALS_START_POSITION",
+    "name": "Startpositie visuals (x≥18, y≥63)",
+    "description": "Geeft de namen van visuals terug die vóór x=18 of y=63 gepositioneerd zijn (alleen zichtbare visuals). Hiermee wordt een uniforme uitlijning geborgd.",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*]",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "map": [
+          {
+            "filter": [
+              { "var": "containers" },
+              {
+                "and": [
+                  { "<": [ { "var": "x" }, 18 ] },
+                  true
+                ]
+              }
+            ]
+          },
+          { "var": "name" }
+        ]
+      },
+      { "containers": "." },
+      []
+    ]
+  },
+
+  {
+    "id": "ENSURE_VISUALS_START_POSITION_Y",
+    "name": "Startpositie visuals (y≥63)",
+    "description": "Geeft de namen van visuals terug die vóór y=63 gepositioneerd zijn (alleen zichtbare visuals). Losse check zodat je exact ziet welke as faalt.",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*]",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "map": [
+          {
+            "filter": [
+              { "var": "containers" },
+              { "<": [ { "var": "y" }, 63 ] }
+            ]
+          },
+          { "var": "name" }
+        ]
+      },
+      { "containers": "." },
+      []
+    ]
+  },
+
+  {
+    "id": "LIMIT_SLICERS_PER_PAGE",
+    "name": "Beperk aantal slicers per pagina",
+    "description": "Rapporteert een waarschuwing wanneer het aantal zichtbare slicers op de pagina groter is dan de ingestelde limiet (standaard 4). NB: controleert het totale aantal — niet per rij.",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "<=": [
+          {
+            "count": [
+              {
+                "filter": [
+                  { "var": "f" },
+                  {
+                    "and": [
+                      { "!=": [ { "var": "singleVisual.display.mode" }, "hidden" ] },
+                      { "==": [ { "var": "singleVisual.visualType" }, "slicer" ] }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "var": "paramMaxSlicersPerPage" }
+        ]
+      },
+      { "f": ".", "paramMaxSlicersPerPage": 4 },
+      true
+    ]
+  },
+
+  {
+    "id": "REQUIRE_CDAR_PAGE_SET",
+    "name": "Toepassen CDAR-principe op pagina’s",
+    "description": "Controleert of pagina-titels het CDAR-principe reflecteren. Geeft ontbrekende categorieën terug (gebaseerd op displayName bevatten van trefwoorden). Minimaal 3 van de 4 vereist.",
+    "logType": "warning",
+    "disabled": false,
+    "path": "$.sections[*]",
+    "pathErrorWhenNoMatch": true,
+    "test": [
+      {
+        "let": [
+          {
+            "pageNames": {
+              "map": [
+                { "var": "pages" },
+                {
+                  "lower": [
+                    { "var": "displayName" }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "missing": {
+              "filter": [
+                { "var": "required" },
+                {
+                  "!": [
+                    {
+                      "some": [
+                        { "var": "pageNames" },
+                        { "strcontains": [ { "var": "" }, { "var": "item" } ] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "if": [
+              { ">=": [ { "count": [ { "var": "missing" } ] }, 2 ] },
+              { "var": "missing" },
+              []
+            ]
+          }
+        ]
+      },
+      {
+        "pages": ".",
+        "required": ["cockpit","dashboard","analyse","rapport"]
+      },
+      []
+    ]
+  },
+
+  {
+    "id": "REQUIRE_DRILLTHROUGH_TITLED",
+    "name": "Titel voor drill-through pagina’s",
+    "description": "Geeft zichtbare drill-through pagina’s (type=2) terug waarvan de titel niet duidelijk ‘Drill-Through’ of ‘Drillthrough’ bevat.",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.config",
+    "pathErrorWhenNoMatch": true,
+    "test": [
+      {
+        "if": [
+          {
+            "and": [
+              { "==": [ { "var": "type" }, 2 ] },
+              { "!=": [ { "var": "visibility" }, 1 ] }
+            ]
+          },
+          {
+            "!": [
+              {
+                "or": [
+                  { "strcontains": [ { "lower": [ { "drillvar": "parent>displayName" } ] }, "drill-through" ] },
+                  { "strcontains": [ { "lower": [ { "drillvar": "parent>displayName" } ] }, "drillthrough" ] }
+                ]
+              }
+            ]
+          },
+          true
+        ]
+      },
+      {},
+      true
+    ]
+  },
+
+  {
+    "id": "ENSURE_REFRESH_DATE_PRESENT",
+    "name": "Weergave verversdatum aanwezig",
+    "description": "Heuristische controle: zoekt een textbox of titel met trefwoorden zoals ‘last refresh’, ‘laatste verversing’, ‘laatst bijgewerkt’. Niet 100% sluitend.",
+    "logType": "warning",
+    "disabled": true,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "!": [
+          {
+            "none": [
+              { "var": "cfg" },
+              {
+                "or": [
+                  {
+                    "and": [
+                      { "==": [ { "var": "singleVisual.visualType" }, "textbox" ] },
+                      {
+                        "strcontains": [
+                          { "lower": [ { "tostring": [ { "var": "" } ] } ] },
+                          "(last refresh|laatste ververs|laatst bijgewerkt)"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "and": [
+                      { "!!": [ { "var": "singleVisual.vcObjects.title" } ] },
+                      {
+                        "strcontains": [
+                          { "lower": [ { "tostring": [ { "var": "singleVisual.vcObjects.title" } ] } ] },
+                          "(last refresh|laatste ververs|laatst bijgewerkt)"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      { "cfg": "." },
+      true
+    ]
+  },
+
+  {
+    "id": "SHORT_TITLES_MAX_LENGTH",
+    "name": "Korte, duidelijke titels",
+    "description": "Rapporteert visuals met (weergave)titel langer dan de ingestelde lengte (standaard 30 tekens). Heuristiek op basis van title-object; niet alle visuals schrijven dit weg.",
+    "logType": "warning",
+    "disabled": true,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "map": [
+          {
+            "filter": [
+              { "var": "vc" },
+              {
+                "and": [
+                  { "!!": [ { "var": "singleVisual.vcObjects.title" } ] },
+                  { ">": [ { "length": [ { "tostring": [ { "var": "singleVisual.vcObjects.title" } ] } ] }, { "var": "paramMaxTitleLength" } ] }
+                ]
+              }
+            ]
+          },
+          { "var": "name" }
+        ]
+      },
+      { "vc": ".", "paramMaxTitleLength": 30 },
+      []
+    ]
+  },
+
+  {
+    "id": "AXIS_TITLES_PRESENT",
+    "name": "As-titels aanwezig (y en secundair-y indien van toepassing)",
+    "description": "Heuristische check of as-titel opties aan staan. Implementatie verschilt per visualtype; mogelijk false-negatives.",
+    "logType": "warning",
+    "disabled": true,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "map": [
+          {
+            "filter": [
+              { "var": "cfg" },
+              {
+                "and": [
+                  { "!": [ { "in": [ { "var": "singleVisual.visualType" }, ["textbox","shape","slicer","actionButton"] ] } ] },
+                  {
+                    "or": [
+                      { "!": [ { "var": "singleVisual.vcObjects.categoryAxis.titleOn" } ] },
+                      { "!": [ { "var": "singleVisual.vcObjects.valueAxis.titleOn" } ] }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "var": "name" }
+        ]
+      },
+      { "cfg": "." },
+      []
+    ]
+  },
+
+  {
+    "id": "NAV_BUTTONS_HAVE_TARGET",
+    "name": "Navigatieknoppen hebben een bestemming",
+    "description": "Rapporteert action buttons zonder klik-actie (navigatie of bookmark).",
+    "logType": "warning",
+    "disabled": false,
+    "forEachPath": "$.sections[*]",
+    "forEachPathName": "$.name",
+    "forEachPathDisplayName": "$.displayName",
+    "path": "$.visualContainers[*].config",
+    "pathErrorWhenNoMatch": false,
+    "test": [
+      {
+        "map": [
+          {
+            "filter": [
+              { "var": "cfg" },
+              {
+                "and": [
+                  { "==": [ { "var": "singleVisual.visualType" }, "actionButton" ] },
+                  {
+                    "none": [
+                      [
+                        { "var": "singleVisual.vcObjects.action" },
+                        { "var": "singleVisual.vcObjects.general" },
+                        { "var": "singleVisual.vcObjects.interactions" }
+                      ],
+                      {
+                        "or": [
+                          { "!!": [ { "var": "properties.destination" } ] },
+                          { "!!": [ { "var": "properties.bookmark" } ] },
+                          { "!!": [ { "var": "properties.pageNavigation" } ] }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "var": "name" }
+        ]
+      },
+      { "cfg": "." },
+      []
+    ]
+  },
+
+  {
+    "id": "PAGE_FIT_TO_PAGE",
+    "name": "Paginaweergave op ‘Fit to page’",
+    "description": "Niet betrouwbaar uit het model te lezen (render-instelling van de client). Deze regel is daarom standaard uitgeschakeld.",
+    "logType": "warning",
+    "disabled": true,
+    "path": "$",
+    "pathErrorWhenNoMatch": false,
+    "test": [ true, {}, true ]
+  },
+
+  {
+    "id": "FORMAT_PERCENT_TWO_DECIMALS",
+    "name": "Percentages met twee decimalen",
+    "description": "Formatteringscontrole is niet robuust in report.json (zit doorgaans in model). Uitgeschakeld totdat model-inspectie is toegevoegd.",
+    "logType": "warning",
+    "disabled": true,
+    "path": "$",
+    "pathErrorWhenNoMatch": false,
+    "test": [ true, {}, true ]
+  },
+
+  {
+    "id": "FORMAT_CURRENCY_NO_DECIMALS",
+    "name": "Bedragen zonder decimalen",
+    "description": "Formatteringscontrole vereist model-toegang (formatString). Uitgeschakeld.",
+    "logType": "warning",
+    "disabled": true,
+    "path": "$",
+    "pathErrorWhenNoMatch": false,
+    "test": [ true, {}, true ]
+  },
+
+  {
+    "id": "CONSISTENT_DATE_FORMAT",
+    "name": "Consistente datumnotatie",
+    "description": "Uniforme datumformatting (YYYY-MM-DD of DD-MM-YYYY) is niet betrouwbaar uit report.json te bepalen. Uitgeschakeld.",
+    "logType": "warning",
+    "disabled": true,
+    "path": "$",
+    "pathErrorWhenNoMatch": false,
+    "test": [ true, {}, true ]
+  }
+]
