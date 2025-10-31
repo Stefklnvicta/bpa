@@ -80,28 +80,6 @@
     "CompatibilityLevel": 1200
   },
   {
-    "ID": "ONNODIGE_KOLOMMEN",
-    "Name": "[Back-end voor 0.8] Verwijder onnodige kolommen",
-    "Category": "Back-end voor 0.8",
-    "Description": "Verborgen kolommen die niet worden gebruikt in DAX-expressies, relaties, hiërarchieën of Sort By-eigenschappen, zouden verwijderd moeten worden.",
-    "Severity": 2,
-    "Scope": "DataColumn, CalculatedColumn, CalculatedTableColumn",
-    "Expression": "ReferencedBy.Any() = false\n\nand UsedInRelationships.Any() = false\n\nand UsedInSortBy.Any() = false\n\nand UsedInHierarchies.Any() = false\n\nand Table.RowLevelSecurity.Any(\n  it <> null and (\n    it.IndexOf(\"[\" + current.Name + \"]\", \"OrdinalIgnoreCase\") >= 0 or\n    it.IndexOf(current.Table.Name + \"[\" + current.Name + \"]\", \"OrdinalIgnoreCase\") >= 0 or\n    it.IndexOf(\"'\" + current.Table.Name + \"'[\" + current.Name + \"]\", \"OrdinalIgnoreCase\") >= 0\n  )\n) = false\n\nand Model.Roles.Any(RowLevelSecurity.Any(\n  it <> null and (\n    it.IndexOf(current.Table.Name + \"[\" + current.Name + \"]\", \"OrdinalIgnoreCase\") >= 0 or\n    it.IndexOf(\"'\" + current.Table.Name + \"'[\" + current.Name + \"]\", \"OrdinalIgnoreCase\") >= 0\n  )\n)) = false\n\nand ObjectLevelSecurity.Any(it.ToString() <> \"None\") = false\n\nand Table.ObjectLevelSecurity.Any(it.ToString() <> \"None\") = false",
-    "FixExpression": "Delete()",
-    "CompatibilityLevel": 1200
-  },
-  {
-    "ID": "ONNODIGE_MEASURES",
-    "Name": "[Back-end voor 0.8] Verwijder onnodige measures",
-    "Category": "Back-end voor 0.8",
-    "Description": "Verborgen measures die nergens worden gebruikt in DAX-expressies, zouden verwijderd moeten worden om het model beter onderhoudbaar te houden.",
-    "Severity": 1,
-    "Scope": "Measure",
-    "Expression": "(Table.IsHidden or IsHidden) \r\nand ReferencedBy.Count = 0",
-    "FixExpression": "Delete()",
-    "CompatibilityLevel": 1200
-  },
-  {
     "ID": "CONTROLEER_OF_DYNAMISCHE_RLS_NOODZAKELIJK_IS",
     "Name": "[Back-end voor 0.8] Controleer of dynamische row level security (RLS) noodzakelijk is",
     "Category": "Back-end voor 0.8",
@@ -192,17 +170,6 @@
     "Scope": "Measure",
     "Expression": "(FormatString.Contains(\"%\") or Name.Contains(\"%\")) and not Name.Contains(\"Icon\") and FormatString <> \"#,0.00%;-#,0.00%;#,0.00%\"",
     "FixExpression": "FormatString = \"#,0.00%\"",
-    "CompatibilityLevel": 1200
-  },
-  {
-    "ID": "FORMATTEER_GEHELE_GETALLEN",
-    "Name": "[Front-end voor 0.8] Gehele getallen formatteren",
-    "Category": "Front-end voor 0.8",
-    "Description": "Gehele getallen: volledig uitschrijven, duizendtallen scheidingsteken, geen cijfers achter de komma",
-    "Severity": 2,
-    "Scope": "Measure",
-    "Expression": "not FormatString.Contains(\"$\") and not FormatString.Contains(\"%\") and not (FormatString = \"#,0\" or FormatString = \"#,0.0\")",
-    "FixExpression": "FormatString = \"#,0\"",
     "CompatibilityLevel": 1200
   },
   {
@@ -317,3 +284,4 @@
     "CompatibilityLevel": 1200
   }
 ]
+
