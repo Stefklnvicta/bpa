@@ -53,45 +53,7 @@
           ]
         },
 
-        {
-          "id": "ENSURE_VISUALS_START_POSITION",
-          "name": "Startpositie visuals (x≥18, y≥63)",
-          "description": "Geeft de namen van visuals terug die vóór x=18 of y=63 gepositioneerd zijn (alleen zichtbare visuals). Hiermee wordt een uniforme uitlijning geborgd.",
-          "logType": "warning",
-          "disabled": false,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*]",
-          "pathErrorWhenNoMatch": false,
-          "test": [
-            {
-              "map": [
-                {
-                  "filter": [
-                    { "var": "containers" },
-                    {
-                      "and": [
-                        { "!=": [ { "drillvar": "config>singleVisual.display.mode" }, "hidden" ] },
-                        {
-                          "or": [
-                            { "<": [ { "var": "x" }, 18 ] },
-                            { "<": [ { "var": "y" }, 63 ] }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                { "var": "name" }
-              ]
-            },
-            { "containers": "." },
-            []
-          ]
-        },
-
-       
+              
         {
           "id": "LIMIT_SLICERS_PER_PAGE",
           "name": "Beperk aantal slicers per pagina",
