@@ -89,60 +89,7 @@
             { "f": ".", "paramMaxSlicersPerPage": 4 },
             true
           ]
-        },
-
-        {
-          "id": "REQUIRE_CDAR_PAGE_SET",
-          "name": "Toepassen CDAR-principe op pagina’s",
-          "description": "Controleert of pagina-titels het CDAR-principe reflecteren. Geeft ontbrekende categorieën terug (gebaseerd op displayName bevatten van trefwoorden). Minimaal 3 van de 4 vereist.",
-          "logType": "warning",
-          "disabled": false,
-          "path": "$.sections[*]",
-          "pathErrorWhenNoMatch": true,
-          "test": [
-            {
-              "let": [
-                {
-                  "pageNames": {
-                    "map": [
-                      { "var": "pages" },
-                      { "lower": [ { "var": "displayName" } ] }
-                    ]
-                  }
-                },
-                {
-                  "missing": {
-                    "filter": [
-                      { "var": "required" },
-                      {
-                        "!": [
-                          {
-                            "some": [
-                              { "var": "pageNames" },
-                              { "strcontains": [ { "var": "" }, { "var": "item" } ] }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "if": [
-                    { ">=": [ { "count": [ { "var": "missing" } ] }, 2 ] },
-                    { "var": "missing" },
-                    []
-                  ]
-                }
-              ]
-            },
-            {
-              "pages": ".",
-              "required": ["cockpit","dashboard","analyse","rapport"]
-            },
-            []
-          ]
-        },
+        }, 
 
         {
           "id": "REQUIRE_DRILLTHROUGH_TITLED",
