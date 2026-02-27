@@ -4,7 +4,7 @@
     "Name": "[Back-end 0.1] Model moet een datum-tabel hebben",
     "Category": "Back-end 0.1",
     "Description": "Over het algemeen hoort een model een datum-tabel te bevatten. Modellen zonder datum-tabel maken meestal geen gebruik van functionaliteiten zoals time intelligence, of hebben mogelijk geen goed gestructureerde architectuur.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Model",
     "Expression": "Tables.Any(DataCategory == \"Time\" && Columns.Any(IsKey == true && DataType == \"DateTime\")) == false",
     "CompatibilityLevel": 1200
@@ -14,7 +14,7 @@
     "Name": "[Back-end 0.1] Split datum & tijd",
     "Category": "Back-end 0.1",
     "Description": "Deze regel detecteert datetime-kolommen waarvan de waarden niet op middernacht liggen. Om de performance te optimaliseren, zou het tijdcomponent gescheiden moeten worden van het datumcomponent (of afgerond moeten worden op middernacht), omdat dit de cardinaliteit van de kolom verlaagt.",
-    "Severity": 2,
+    "Severity": 3,
     "Scope": "DataColumn, CalculatedColumn, CalculatedTableColumn",
     "Expression": "Convert.ToInt32(GetAnnotation(\"DateTimeWithHourMinSec\")) > 0",
     "CompatibilityLevel": 1200
@@ -34,7 +34,7 @@
     "Name": "[Back-end 0.3] Minimaliseer Power Query-transformaties",
     "Category": "Back-end 0.3",
     "Description": "Minimaliseer Power Query-transformaties om de verwerkingssnelheid van het model te verbeteren. Het is een best practice om deze transformaties waar mogelijk te verplaatsen naar het data warehouse. Controleer ook of query folding wordt toegepast binnen je model. Raadpleeg het onderstaande artikel voor meer informatie over query folding.\r\nReferentie: https://docs.microsoft.com/power-query/power-query-folding",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Partition",
     "Expression": "\nSourceType.ToString() = \"M\"\r\nand\r\n(\r\nQuery.Contains(\"Table.Combine(\")\r\nor\r\n\nQuery.Contains(\"Table.Join(\")\r\nor\r\n\nQuery.Contains(\"Table.NestedJoin(\")\r\nor\r\nQuery.Contains(\"Table.AddColumn(\")\r\nor\r\nQuery.Contains(\"Table.Group(\")\r\nor\r\nQuery.Contains(\"Table.Sort(\")\r\nor\r\nQuery.Contains(\"Table.Pivot(\")\r\nor\r\nQuery.Contains(\"Table.Unpivot(\")\r\nor\r\nQuery.Contains(\"Table.UnpivotOtherColumns(\")\r\nor\r\nQuery.Contains(\"Table.Distinct(\")\r\nor\r\nQuery.Contains(\"[Query=\"\"SELECT\")\r\nor\r\nQuery.Contains(\"Value.NativeQuery\")\r\nor\r\nQuery.Contains(\"OleDb.Query\")\r\nor\r\nQuery.Contains(\"Odbc.Query\")\r\n)",
     "CompatibilityLevel": 1200
@@ -44,7 +44,7 @@
     "Name": "[Back-end 0.3] Controleer bi-directionele en veel-op-veel relaties",
     "Category": "Back-end 0.3",
     "Description": "Bi-directionele en veel-op-veel relaties kunnen zorgen voor prestatieproblemen of onverwacht gedrag. Controleer of deze specifieke relaties correct functioneren zoals bedoeld, en of ze daadwerkelijk nodig zijn.\r\nReferentie: https://www.sqlbi.com/articles/bidirectional-relationships-and-ambiguity-in-dax/",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Relationship",
     "Expression": "FromCardinality.ToString() = \"Many\" and ToCardinality.ToString() = \"Many\"\r\nor\r\nCrossFilteringBehavior == CrossFilteringBehavior.BothDirections",
     "CompatibilityLevel": 1200
@@ -64,7 +64,7 @@
     "Name": "[Back-end 0.3] Voorkom bi-directionele relaties op kolommen met hoge cardinaliteit",
     "Category": "Back-end 0.3",
     "Description": "Voor optimale performance wordt aangeraden om geen bi-directionele relaties te gebruiken op kolommen met een hoge cardinaliteit. Om deze regel te kunnen uitvoeren, moet je eerst het script draaien zoals beschreven op: https://www.elegantbi.com/post/vertipaqintabulareditor",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "DataColumn, CalculatedColumn, CalculatedTableColumn",
     "Expression": "UsedInRelationships.Any(CrossFilteringBehavior == CrossFilteringBehavior.BothDirections)\n\nand\n\nConvert.ToInt64(GetAnnotation(\"Vertipaq_Cardinality\")) > 100000",
     "CompatibilityLevel": 1200
@@ -84,7 +84,7 @@
     "Name": "[Back-end voor 0.8] Controleer of dynamische row level security (RLS) noodzakelijk is",
     "Category": "Back-end voor 0.8",
     "Description": "Het gebruik van dynamische row level security (RLS) kan extra geheugen- en performancebelasting veroorzaken. Onderzoek goed de voor- en nadelen van het gebruik hiervan.\r\nReferentie: https://docs.microsoft.com/power-bi/admin/service-admin-rls",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "TablePermission",
     "Expression": "RegEx.IsMatch(Expression,\"(?i)USERNAME\\(\")\r\nor\r\nRegEx.IsMatch(Expression,\"(?i)USERPRINCIPALNAME\\(\")",
     "CompatibilityLevel": 1200
@@ -94,7 +94,7 @@
     "Name": "[Back-end voor 0.8] Beperk aantal berekende kolommen",
     "Category": "Back-end voor 0.8",
     "Description": "Berekende kolommen worden minder goed gecomprimeerd dan datakolommen en nemen daardoor meer geheugen in beslag. Ze vertragen ook de verwerking van zowel de tabel als herberekeningen. Verplaats de logica van berekende kolommen naar het data warehouse en maak er datakolommen van.\r\nReferentie: https://www.elegantbi.com/post/top10bestpractices",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "DataColumn, CalculatedColumn, CalculatedTableColumn",
     "Expression": "not (current.Table != null and current.Table.Name.Contains(\"DateTable\")) and Type.ToString() == \"Calculated\"",
     "CompatibilityLevel": 1200
@@ -124,7 +124,7 @@
     "Name": "[Front-end voor 0.8] Verwijder voor- en achterruimte in objectnamen",
     "Category": "Front-end voor 0.8",
     "Description": "Onbedoeld een spatie aan het einde van een objectnaam achterlaten komt vaak voor bij het kopiëren/dupliceren van objecten in Tabular Editor.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Model, Table, Measure, Hierarchy, Level, Perspective, Partition, ProviderDataSource, DataColumn, CalculatedColumn, CalculatedTable, CalculatedTableColumn, StructuredDataSource, NamedExpression, ModelRole, CalculationGroup, CalculationItem",
     "Expression": "Name.StartsWith(\" \") or Name.EndsWith(\" \")",
     "CompatibilityLevel": 1200
@@ -155,7 +155,7 @@
     "Name": "[Front-end voor 0.8] Valuta: Weergeven met valutateken",
     "Category": "Front-end voor 0.8",
     "Description": "Zorg ervoor dat valutakolommen in het model geformatteerd zijn met een passend valutateken.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Measure",
     "Expression": "not IsHidden \r\nand not Table.IsHidden \r\nand FormatString.Contains(\"€\")\r\nand DataType = DataType.Decimal\r\n",
     "FixExpression": "FormatString = \"€#,0.00\"",
@@ -166,7 +166,7 @@
     "Name": "[Front-end voor 0.8] Percentage: Volledig formaat, 2 decimalen",
     "Category": "Front-end voor 0.8",
     "Description": "Zorg ervoor dat percentagekolommen in het model worden weergegeven met 2 decimalen en het '%' symbool.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Measure",
     "Expression": "(FormatString.Contains(\"%\") or Name.Contains(\"%\")) and not Name.Contains(\"Icon\") and FormatString <> \"#,0.00%;-#,0.00%;#,0.00%\"",
     "FixExpression": "FormatString = \"#,0.00%\"",
@@ -176,7 +176,7 @@
     "ID": "EERSTE_LETTER_VAN_OBJECTEN_MOET_HOOFDLETTER_ZIJN",
     "Name": "[Front-end voor 0.8] Eerste letter van objecten moet een hoofdletter zijn",
     "Category": "Front-end voor 0.8",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Table, Measure, Hierarchy, CalculatedColumn, CalculatedTable, CalculatedTableColumn, CalculationGroup",
     "Expression": "Name.Substring(0,1).ToUpper() != Name.Substring(0,1)",
     "CompatibilityLevel": 1200
@@ -186,7 +186,7 @@
     "Name": "[Front-end voor 0.8] Objectnamen mogen geen speciale tekens bevatten",
     "Category": "Front-end voor 0.8",
     "Description": "Tabs, regeleinden, enzovoort.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Model, Table, Measure, Hierarchy, Perspective, Partition, DataColumn, CalculatedColumn, CalculatedTable, CalculatedTableColumn, CalculationGroup, CalculationItem",
     "Expression": "Name.IndexOf(char(9)) > -1\r\nor\r\n\nName.IndexOf(char(10)) > -1 \r\nor\r\n\nName.IndexOf(char(13)) > -1",
     "CompatibilityLevel": 1200
@@ -207,7 +207,7 @@
     "Name": "[Front-end voor 0.8] Vermijd ongeldige tekens in namen",
     "Category": "Front-end voor 0.8",
     "Description": "Deze regel identificeert of een naam voor een gegeven object in je model (bijv. tabel/kolom/meting) een ongeldig teken bevat. Ongeldige tekens veroorzaken een fout bij het implementeren van het model (en leiden tot een mislukte implementatie). Deze regel bevat een fix-expressie die het ongeldige teken omzet in een spatie, waarmee het probleem wordt opgelost.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Table, Measure, Hierarchy, Level, Perspective, Partition, DataColumn, CalculatedColumn, CalculatedTable, CalculatedTableColumn, KPI, ModelRole, CalculationGroup, CalculationItem",
     "Expression": "Name.ToCharArray().Any(char.IsControl(it) and !char.IsWhiteSpace(it))",
     "FixExpression": "Name = string.Concat( it.Name.ToCharArray().Select( c => (char.IsControl(c) && !char.IsWhiteSpace(c)) ? ' ': c ))",
@@ -218,7 +218,7 @@
     "Name": "[Front-end voor 0.8] Relatiekolommen moeten van hetzelfde gegevenstype zijn",
     "Category": "Front-end voor 0.8",
     "Description": "Kolommen die in een relatie worden gebruikt, moeten van hetzelfde gegevenstype zijn. Idealiter zijn ze van het gehele type (zie de verwante regel '[Formatting] Relationship columns should be of integer data type'). Als kolommen binnen een relatie van verschillende gegevenstypen zijn, kan dit leiden tot diverse problemen.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Relationship",
     "Expression": "FromColumn.DataType != ToColumn.DataType",
     "CompatibilityLevel": 1200
@@ -228,7 +228,7 @@
     "Name": "[Front-end voor 0.8] Vermijd de USERELATIONSHIP-functie en RLS op dezelfde tabel",
     "Category": "Front-end voor 0.8",
     "Description": "De USERELATIONSHIP-functie mag niet worden gebruikt op een tabel die ook row-level security (RLS) toepast. Dit zal een fout genereren wanneer de betreffende meting in een visualisatie wordt gebruikt. Deze regel markeert de tabel die wordt gebruikt in de USERELATIONSHIP-functie van een meting evenals RLS.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Table, CalculatedTable",
     "Expression": "Model.AllMeasures.Any(RegEx.IsMatch(Expression,\"(?i)USERELATIONSHIP\\s*\\(\\s*.+?(?=])\\]\\s*,\\s*'*\" + current.Name + \"'*\\[\"))\r\nand\r\nRowLevelSecurity.Any(it <> null)",
     "CompatibilityLevel": 1200
@@ -238,7 +238,7 @@
     "Name": "[Front-end voor 0.8] Inactieve relaties die nooit worden geactiveerd",
     "Category": "Front-end voor 0.8",
     "Description": "Inactieve relaties worden geactiveerd met de USERELATIONSHIP-functie. Als een inactieve relatie in geen enkele meting via deze functie wordt genoemd, zal de relatie niet worden gebruikt. Er moet worden bepaald of de relatie niet noodzakelijk is of via deze methode geactiveerd moet worden.",
-    "Severity": 1,
+    "Severity": 2,
     "Scope": "Relationship",
     "Expression": "IsActive == false\r\nand not\r\n(\r\nModel.AllMeasures.Any(RegEx.IsMatch(Expression,\r\n\"(?i)USERELATIONSHIP\\s*\\(\\s*\\'*\" +\r\ncurrent.FromTable.Name + \"\\'*\\[\" + \r\ncurrent.FromColumn.Name + \"\\]\\s*,\\s*\\'*\" +\r\ncurrent.ToTable.Name + \"\\'*\\[\" +\r\ncurrent.ToColumn.Name + \"\\]\"))\r\nor\r\nModel.AllCalculationItems.Any(RegEx.IsMatch(Expression,\r\n\"(?i)USERELATIONSHIP\\s*\\(\\s*\\'*\" +\r\ncurrent.FromTable.Name + \"\\'*\\[\" + \r\ncurrent.FromColumn.Name + \"\\]\\s*,\\s*\\'*\" +\r\ncurrent.ToTable.Name + \"\\'*\\[\" +\r\ncurrent.ToColumn.Name + \"\\]\"))\r\nor\r\nModel.AllMeasures.Any(RegEx.IsMatch(Expression,\r\n\"(?i)TREATAS\\s*\\(.*\\[\" +\r\ncurrent.FromColumn.Name + \"\\].*\\[\" +\r\ncurrent.ToColumn.Name + \"\\]\"))\r\nor\r\nModel.AllCalculationItems.Any(RegEx.IsMatch(Expression,\r\n\"(?i)TREATAS\\s*\\(.*\\[\" +\r\ncurrent.FromColumn.Name + \"\\].*\\[\" +\r\ncurrent.ToColumn.Name + \"\\]\"))\r\n)",
     "CompatibilityLevel": 1200
@@ -284,4 +284,5 @@
     "CompatibilityLevel": 1200
   }
 ]
+
 
