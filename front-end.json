@@ -1,171 +1,272 @@
 {
-  "pbiEntries": [
+  "rules": [
     {
-      "name": "reportLayout",
-      "pbixEntryPath": "Report/Layout",
-      "pbipEntryPath": "report.json",
-      "contentType": "json",
-      "codepage": 1200,
-      "rules": [
+      "id": "FRONTEND_VISUAL_SPACING_10PX",
+      "name": "[Front-end voor 0.8] Minimaal 10 px tussenruimte tussen visuals",
+      "description": "Controleert ongegroepeerde, zichtbare data-visuals op onderlinge overlap met 5 px marge rondom ieder object. Daardoor wordt effectief circa 10 px tussenruimte afgedwongen. Decoratieve shapes, textboxes en action buttons worden uitgesloten om false positives te beperken.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
         {
-          "id": "LIMIT_VISUALS_PER_PAGE_STRICT",
-          "name": "Beperk aantal visuals per pagina (8–10)",
-          "description": "Rapporteert een waarschuwing als het aantal zichtbare visuals op een pagina groter is dan de strikte bovengrens (standaard 10). Sluit vormen, slicers, buttons en textboxes uit — in lijn met de bestaande regel maar strenger.",
-          "logType": "warning",
-          "disabled": false,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
+          "rectoverlap": [
             {
-              "<=": [
+              "map": [
                 {
-                  "count": [
+                  "filter": [
                     {
-                      "filter": [
-                        { "var": "visuals" },
+                      "part": "Visuals"
+                    },
+                    {
+                      "and": [
                         {
-                          "and": [
-                            { "!=": [ { "var": "singleVisual.display.mode" }, "hidden" ] },
+                          "!!": [
                             {
-                              "!": [
-                                {
-                                  "in": [
-                                    { "var": "singleVisual.visualType" },
-                                    ["shape","slicer","actionButton","textbox"]
-                                  ]
-                                }
-                              ]
+                              "var": "name"
                             }
                           ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                { "var": "paramMaxVisualsPerPageStrict" }
-              ]
-            },
-            { "visuals": ".", "paramMaxVisualsPerPageStrict": 10 },
-            true
-          ]
-        },
-
-              
-        {
-          "id": "LIMIT_SLICERS_PER_PAGE",
-          "name": "Beperk aantal slicers per pagina",
-          "description": "Rapporteert een waarschuwing wanneer het aantal zichtbare slicers op de pagina groter is dan de ingestelde limiet (standaard 4). NB: controleert het totale aantal — niet per rij.",
-          "logType": "warning",
-          "disabled": false,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
-            {
-              "<=": [
-                {
-                  "count": [
-                    {
-                      "filter": [
-                        { "var": "f" },
+                        },
                         {
-                          "and": [
-                            { "!=": [ { "var": "singleVisual.display.mode" }, "hidden" ] },
-                            { "==": [ { "var": "singleVisual.visualType" }, "slicer" ] }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                { "var": "paramMaxSlicersPerPage" }
-              ]
-            },
-            { "f": ".", "paramMaxSlicersPerPage": 4 },
-            true
-          ]
-        }, 
-
-        {
-          "id": "REQUIRE_DRILLTHROUGH_TITLED",
-          "name": "Titel voor drill-through pagina’s",
-          "description": "Geeft zichtbare drill-through pagina’s (type=2) terug waarvan de titel niet duidelijk ‘Drill-Through’ of ‘Drillthrough’ bevat.",
-          "logType": "warning",
-          "disabled": false,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.config",
-          "pathErrorWhenNoMatch": true,
-          "test": [
-            {
-              "if": [
-                {
-                  "and": [
-                    { "==": [ { "var": "type" }, 2 ] },
-                    { "!=": [ { "var": "visibility" }, 1 ] }
-                  ]
-                },
-                {
-                  "!": [
-                    {
-                      "or": [
-                        { "strcontains": [ { "lower": [ { "drillvar": "parent>displayName" } ] }, "drill-through" ] },
-                        { "strcontains": [ { "lower": [ { "drillvar": "parent>displayName" } ] }, "drillthrough" ] }
-                      ]
-                    }
-                  ]
-                },
-                true
-              ]
-            },
-            {},
-            true
-          ]
-        },
-
-        {
-          "id": "ENSURE_REFRESH_DATE_PRESENT",
-          "name": "Weergave verversdatum aanwezig",
-          "description": "Heuristische controle: zoekt een textbox of titel met trefwoorden zoals ‘last refresh’, ‘laatste verversing’, ‘laatst bijgewerkt’. Niet 100% sluitend.",
-          "logType": "warning",
-          "disabled": true,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
-            {
-              "!": [
-                {
-                  "none": [
-                    { "var": "cfg" },
-                    {
-                      "or": [
-                        {
-                          "and": [
-                            { "==": [ { "var": "singleVisual.visualType" }, "textbox" ] },
+                          "!": [
                             {
-                              "strcontains": [
-                                { "lower": [ { "tostring": [ { "var": "" } ] } ] },
-                                "(last refresh|laatste ververs|laatst bijgewerkt)"
+                              "var": "isHidden"
+                            }
+                          ]
+                        },
+                        {
+                          "!": [
+                            {
+                              "var": "parentGroupName"
+                            }
+                          ]
+                        },
+                        {
+                          "!": [
+                            {
+                              "in": [
+                                {
+                                  "var": "visual.visualType"
+                                },
+                                [
+                                  "shape",
+                                  "textbox",
+                                  "actionButton"
+                                ]
                               ]
                             }
                           ]
                         },
                         {
-                          "and": [
-                            { "!!": [ { "var": "singleVisual.vcObjects.title" } ] },
+                          ">=": [
                             {
-                              "strcontains": [
-                                { "lower": [ { "tostring": [ { "var": "singleVisual.vcObjects.title" } ] } ] },
-                                "(last refresh|laatste ververs|laatst bijgewerkt)"
+                              "var": "position.x"
+                            },
+                            0
+                          ]
+                        },
+                        {
+                          ">=": [
+                            {
+                              "var": "position.y"
+                            },
+                            0
+                          ]
+                        },
+                        {
+                          ">=": [
+                            {
+                              "var": "position.width"
+                            },
+                            0
+                          ]
+                        },
+                        {
+                          ">=": [
+                            {
+                              "var": "position.height"
+                            },
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "torecord": [
+                    "name",
+                    {
+                      "var": "name"
+                    },
+                    "x",
+                    {
+                      "var": "position.x"
+                    },
+                    "y",
+                    {
+                      "var": "position.y"
+                    },
+                    "width",
+                    {
+                      "var": "position.width"
+                    },
+                    "height",
+                    {
+                      "var": "position.height"
+                    }
+                  ]
+                }
+              ]
+            },
+            5
+          ]
+        },
+        {},
+        []
+      ]
+    },
+    {
+      "id": "FRONTEND_VISUAL_START_POSITION",
+      "name": "[Front-end voor 0.8] Visuals starten vanaf x=18 en y=63",
+      "description": "Controleert zichtbare, ongegroepeerde data-visuals op de afgesproken contentmarge: minimaal 18 px vanaf links en 63 px vanaf boven. Shapes, textboxes en action buttons worden uitgesloten.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
+        {
+          "map": [
+            {
+              "filter": [
+                {
+                  "part": "Visuals"
+                },
+                {
+                  "and": [
+                    {
+                      "!!": [
+                        {
+                          "var": "name"
+                        }
+                      ]
+                    },
+                    {
+                      "!": [
+                        {
+                          "var": "isHidden"
+                        }
+                      ]
+                    },
+                    {
+                      "!": [
+                        {
+                          "var": "parentGroupName"
+                        }
+                      ]
+                    },
+                    {
+                      "!": [
+                        {
+                          "in": [
+                            {
+                              "var": "visual.visualType"
+                            },
+                            [
+                              "shape",
+                              "textbox",
+                              "actionButton"
+                            ]
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "or": [
+                        {
+                          "<": [
+                            {
+                              "var": "position.x"
+                            },
+                            18
+                          ]
+                        },
+                        {
+                          "<": [
+                            {
+                              "var": "position.y"
+                            },
+                            63
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "torecord": [
+                "name",
+                {
+                  "var": "name"
+                },
+                "x",
+                {
+                  "var": "position.x"
+                },
+                "y",
+                {
+                  "var": "position.y"
+                }
+              ]
+            }
+          ]
+        },
+        {},
+        []
+      ]
+    },
+    {
+      "id": "FRONTEND_MAX_10_VISUALS_PER_PAGE",
+      "name": "[Front-end voor 0.8] Beperk aantal visuals per pagina tot 10",
+      "description": "Maximaal 10 zichtbare data-visuals per pagina. Shapes, slicers, action buttons en textboxes tellen niet mee.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
+        {
+          "<=": [
+            {
+              "count": [
+                {
+                  "filter": [
+                    {
+                      "part": "Visuals"
+                    },
+                    {
+                      "and": [
+                        {
+                          "!": [
+                            {
+                              "var": "isHidden"
+                            }
+                          ]
+                        },
+                        {
+                          "!": [
+                            {
+                              "in": [
+                                {
+                                  "var": "visual.visualType"
+                                },
+                                [
+                                  "shape",
+                                  "slicer",
+                                  "actionButton",
+                                  "textbox"
+                                ]
                               ]
                             }
                           ]
@@ -176,114 +277,184 @@
                 }
               ]
             },
-            { "cfg": "." },
-            true
+            10
           ]
         },
-
+        {},
+        true
+      ]
+    },
+    {
+      "id": "FRONTEND_REFRESH_DATE_PRESENT",
+      "name": "[Front-end 0.1] Weergave verversdatum aanwezig",
+      "description": "Heuristische rapportbrede controle. Zoekt in alle visuals naar verwijzingen of tekst met refresh/ververs/bijgewerkt/last run/PBI_LastRun. Deze regel is bewust een warning omdat naamgeving per model kan verschillen.",
+      "logType": "warning",
+      "itemType": "Report",
+      "disabled": false,
+      "test": [
         {
-          "id": "SHORT_TITLES_MAX_LENGTH",
-          "name": "Korte, duidelijke titels",
-          "description": "Rapporteert visuals met (weergave)titel langer dan de ingestelde lengte (standaard 30 tekens). Heuristiek op basis van title-object; niet alle visuals schrijven dit weg.",
-          "logType": "warning",
-          "disabled": true,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
+          ">": [
             {
-              "map": [
+              "count": [
                 {
                   "filter": [
-                    { "var": "vc" },
                     {
-                      "and": [
-                        { "!!": [ { "var": "singleVisual.vcObjects.title" } ] },
-                        { ">": [ { "length": [ { "tostring": [ { "var": "singleVisual.vcObjects.title" } ] } ] }, { "var": "paramMaxTitleLength" } ] }
+                      "part": "AllVisuals"
+                    },
+                    {
+                      "strcontains": [
+                        {
+                          "tostring": [
+                            {
+                              "var": ""
+                            }
+                          ]
+                        },
+                        "(?i)(refresh|ververs|bijgewerkt|last[ _-]?run|pbi[ _-]?last[ _-]?run)"
                       ]
                     }
                   ]
-                },
-                { "var": "name" }
+                }
               ]
             },
-            { "vc": ".", "paramMaxTitleLength": 30 },
-            []
+            0
           ]
         },
-
+        {},
+        true
+      ]
+    },
+    {
+      "id": "FRONTEND_AXIS_TITLES_PRESENT",
+      "name": "[Front-end voor 0.8] As-titels aanwezig",
+      "description": "Controleert relevante lijn-, staaf- en kolomgrafieken op ingeschakelde categorie- en waarde-as-titels. Alleen expliciet uitgeschakelde as-titels worden gerapporteerd.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
         {
-          "id": "AXIS_TITLES_PRESENT",
-          "name": "As-titels aanwezig (y en secundair-y indien van toepassing)",
-          "description": "Heuristische check of as-titel opties aan staan. Implementatie verschilt per visualtype; mogelijk false-negatives.",
-          "logType": "warning",
-          "disabled": true,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
+          "map": [
             {
-              "map": [
+              "filter": [
                 {
-                  "filter": [
-                    { "var": "cfg" },
+                  "part": "Visuals"
+                },
+                {
+                  "and": [
                     {
-                      "and": [
-                        { "!": [ { "in": [ { "var": "singleVisual.visualType" }, ["textbox","shape","slicer","actionButton"] ] } ] },
+                      "in": [
                         {
-                          "or": [
-                            { "!": [ { "var": "singleVisual.vcObjects.categoryAxis.titleOn" } ] },
-                            { "!": [ { "var": "singleVisual.vcObjects.valueAxis.titleOn" } ] }
+                          "var": "visual.visualType"
+                        },
+                        [
+                          "lineChart",
+                          "barChart",
+                          "columnChart",
+                          "clusteredBarChart",
+                          "stackedBarChart"
+                        ]
+                      ]
+                    },
+                    {
+                      "or": [
+                        {
+                          "==": [
+                            {
+                              "var": "visual.objects.categoryAxis.0.properties.showAxisTitle.expr.Literal.Value"
+                            },
+                            "false"
+                          ]
+                        },
+                        {
+                          "==": [
+                            {
+                              "var": "visual.objects.valueAxis.0.properties.showAxisTitle.expr.Literal.Value"
+                            },
+                            "false"
                           ]
                         }
                       ]
                     }
                   ]
-                },
-                { "var": "name" }
+                }
               ]
             },
-            { "cfg": "." },
-            []
+            {
+              "var": "name"
+            }
           ]
         },
-
+        {},
+        []
+      ]
+    },
+    {
+      "id": "FRONTEND_NAV_BUTTONS_HAVE_TARGET",
+      "name": "[Front-end voor 0.8] Navigatieknoppen hebben een bestemming",
+      "description": "Controleert zichtbare action buttons op een geldige visual link, zoals bookmark-, pagina-, web- of drillthroughnavigatie.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
         {
-          "id": "NAV_BUTTONS_HAVE_TARGET",
-          "name": "Navigatieknoppen hebben een bestemming",
-          "description": "Rapporteert action buttons zonder klik-actie (navigatie of bookmark).",
-          "logType": "warning",
-          "disabled": false,
-          "forEachPath": "$.sections[*]",
-          "forEachPathName": "$.name",
-          "forEachPathDisplayName": "$.displayName",
-          "path": "$.visualContainers[*].config",
-          "pathErrorWhenNoMatch": false,
-          "test": [
+          "map": [
             {
-              "map": [
+              "filter": [
                 {
-                  "filter": [
-                    { "var": "cfg" },
+                  "part": "Visuals"
+                },
+                {
+                  "and": [
                     {
-                      "and": [
-                        { "==": [ { "var": "singleVisual.visualType" }, "actionButton" ] },
+                      "==": [
                         {
-                          "none": [
-                            [
-                              { "var": "singleVisual.vcObjects.action" },
-                              { "var": "singleVisual.vcObjects.general" },
-                              { "var": "singleVisual.vcObjects.interactions" }
-                            ],
+                          "var": "visual.visualType"
+                        },
+                        "actionButton"
+                      ]
+                    },
+                    {
+                      "!": [
+                        {
+                          "var": "isHidden"
+                        }
+                      ]
+                    },
+                    {
+                      "none": [
+                        {
+                          "var": "visual.visualContainerObjects.visualLink"
+                        },
+                        {
+                          "or": [
                             {
-                              "or": [
-                                { "!!": [ { "var": "properties.destination" } ] },
-                                { "!!": [ { "var": "properties.bookmark" } ] },
-                                { "!!": [ { "var": "properties.pageNavigation" } ] }
+                              "!!": [
+                                {
+                                  "var": "properties.bookmark"
+                                }
+                              ]
+                            },
+                            {
+                              "!!": [
+                                {
+                                  "var": "properties.navigationSection"
+                                }
+                              ]
+                            },
+                            {
+                              "!!": [
+                                {
+                                  "var": "properties.webUrl"
+                                }
+                              ]
+                            },
+                            {
+                              "!!": [
+                                {
+                                  "var": "properties.drillthroughSection"
+                                }
                               ]
                             }
                           ]
@@ -291,58 +462,147 @@
                       ]
                     }
                   ]
-                },
-                { "var": "name" }
+                }
               ]
             },
-            { "cfg": "." },
-            []
+            {
+              "var": "name"
+            }
           ]
         },
-
+        {},
+        []
+      ]
+    },
+    {
+      "id": "FRONTEND_HIDE_TOOLTIP_DRILLTHROUGH_PAGES",
+      "name": "[Front-end voor 0.8] Tooltip- en drill-throughpagina's zijn verborgen",
+      "description": "Tooltip- en drillthroughpagina's mogen niet zichtbaar zijn in de normale paginanavigatie voor eindgebruikers.",
+      "logType": "warning",
+      "itemType": "Report",
+      "disabled": false,
+      "test": [
         {
-          "id": "PAGE_FIT_TO_PAGE",
-          "name": "Paginaweergave op ‘Fit to page’",
-          "description": "Niet betrouwbaar uit het model te lezen (render-instelling van de client). Deze regel is daarom standaard uitgeschakeld.",
-          "logType": "warning",
-          "disabled": true,
-          "path": "$",
-          "pathErrorWhenNoMatch": false,
-          "test": [ true, {}, true ]
+          "map": [
+            {
+              "filter": [
+                {
+                  "part": "Pages"
+                },
+                {
+                  "and": [
+                    {
+                      "in": [
+                        {
+                          "var": "pageBinding.type"
+                        },
+                        [
+                          "Tooltip",
+                          "Drillthrough"
+                        ]
+                      ]
+                    },
+                    {
+                      "!=": [
+                        {
+                          "var": "visibility"
+                        },
+                        "HiddenInViewMode"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "var": "displayName"
+            }
+          ]
         },
-
+        {},
+        []
+      ]
+    },
+    {
+      "id": "FRONTEND_DRILLTHROUGH_TITLE",
+      "name": "[Front-end voor 0.8] Drill-throughpagina heeft duidelijke titel",
+      "description": "Controleert of de naam van een drillthroughpagina 'Drill-Through' of 'Drillthrough' bevat. Hiermee blijft de functie van detailpagina's herkenbaar voor ontwikkelaars.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
         {
-          "id": "FORMAT_PERCENT_TWO_DECIMALS",
-          "name": "Percentages met twee decimalen",
-          "description": "Formatteringscontrole is niet robuust in report.json (zit doorgaans in model). Uitgeschakeld totdat model-inspectie is toegevoegd.",
-          "logType": "warning",
-          "disabled": true,
-          "path": "$",
-          "pathErrorWhenNoMatch": false,
-          "test": [ true, {}, true ]
+          "?:": [
+            {
+              "==": [
+                {
+                  "var": "pageBinding.type"
+                },
+                "Drillthrough"
+              ]
+            },
+            {
+              "strcontains": [
+                {
+                  "var": "displayName"
+                },
+                "(?i)drill[- ]?through"
+              ]
+            },
+            true
+          ]
         },
-
+        {},
+        true
+      ]
+    },
+    {
+      "id": "FRONTEND_MAX_4_SLICERS_PER_PAGE",
+      "name": "[Front-end voor 0.8] Beperk aantal slicers",
+      "description": "Maximaal 4 zichtbare slicers per pagina. Dit is een conservatieve, eenduidige CI-interpretatie van de richtlijn 'maximaal 4 slicers per rij'; rijherkenning op basis van y-coordinaten zou onnodig foutgevoelig zijn.",
+      "logType": "warning",
+      "itemType": "Report",
+      "part": "Pages",
+      "disabled": false,
+      "test": [
         {
-          "id": "FORMAT_CURRENCY_NO_DECIMALS",
-          "name": "Bedragen zonder decimalen",
-          "description": "Formatteringscontrole vereist model-toegang (formatString). Uitgeschakeld.",
-          "logType": "warning",
-          "disabled": true,
-          "path": "$",
-          "pathErrorWhenNoMatch": false,
-          "test": [ true, {}, true ]
+          "<=": [
+            {
+              "count": [
+                {
+                  "filter": [
+                    {
+                      "part": "Visuals"
+                    },
+                    {
+                      "and": [
+                        {
+                          "==": [
+                            {
+                              "var": "visual.visualType"
+                            },
+                            "slicer"
+                          ]
+                        },
+                        {
+                          "!": [
+                            {
+                              "var": "isHidden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            4
+          ]
         },
-
-        {
-          "id": "CONSISTENT_DATE_FORMAT",
-          "name": "Consistente datumnotatie",
-          "description": "Uniforme datumformatting (YYYY-MM-DD of DD-MM-YYYY) is niet betrouwbaar uit report.json te bepalen. Uitgeschakeld.",
-          "logType": "warning",
-          "disabled": true,
-          "path": "$",
-          "pathErrorWhenNoMatch": false,
-          "test": [ true, {}, true ]
-        }
+        {},
+        true
       ]
     }
   ]
